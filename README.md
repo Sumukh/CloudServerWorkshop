@@ -1,7 +1,7 @@
 Cloudy with a Chance of Servers
 ===================
 ### A guide to getting started with “the cloud”. 
-#### Author: Sumukh Sridhara (@sumukhsridhara)
+##### Author: Sumukh Sridhara 
 ---
 A workshop intended for those who are new to using web server/"the cloud". 
 
@@ -90,7 +90,10 @@ Now it should look like this.
                 ErrorDocument 404 /index.html
 ```
 
-Then: ```sudo service apache2 restart```
+Then: 
+```
+sudo service apache2 restart
+```
 
 
 Now go to page that doesn't exist in your browser- so instead of index.html try /nope.html
@@ -121,6 +124,7 @@ sudo nano /etc/nginx/sites-available/default
 ```
 cd /usr/share/nginx/www
 ```
+
 Refresh your browser
 
 ```
