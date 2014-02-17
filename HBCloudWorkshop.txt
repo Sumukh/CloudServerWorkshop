@@ -1,0 +1,205 @@
+﻿H@B: Cloudy with a Chance of Servers
+
+A guide to getting started with “the cloud”. - Sumukh Sridhara
+
+
+What will this workshop cover: 
+1. Quick overview of the cloud (DNS, Servers, ETC)
+2. How to get started with the cloud by launching a server (say on DigitalOcean). 
+3. Let’s use apache to server up a webpage. Woo! 
+4. Modify the pages, maybe install Wordpress or a personal website
+5. Quickly talk about databases, and provide link on how to set them up. 
+6. Now let’s use something much better: Nginx. 
+7. Use Nginx to serve up the page. Do a quick speed test or load test.
+8. Let’s talk about AWS. What is the benefit of AWS (What do you use it for? etc)
+9. Example of launching servers, using SSH authentication. S3 is for file storage. CDN 
+10. What else can you do? Configure subdomains with DNS. Setup an email server. Use the server as backup. 
+11. Let’s talk maintenance & keeping the server up. aka Scaling. NewRelic monitoring, Pingdom. How do you ensure your site stays up and fast. Use a CDN. 
+
+
+1. The cloud -> aka - Servers connected to the internet. 
+
+A long time ago in a land (not so) far away, if you wanted to run a website you’d need buy physical server and host them yourself in a datacenter that you would need to rent, buy, or build at an expense of million. Now with the “cloud” - you can spin up your own virtual server in minutes for a few cents. 
+
+
+So let’s get started. By the end of the workshop - you’ll have your site deployed onto a VPS (Virtual Private Server). So let’s sign up for DigitalOcean which will help us create a server 
+(You need a credit card (There are promo codes if you need them SSD2014 and OMGSSD10)) 
+
+
+Sign into DO’s Control Panel. You’re going to create a new “Droplet” which is a VPS.  It’s a virtualized server. Let’s go with the smallest one. 512MB. Now we choose an OS. 
+Ubuntu 12.04 x64 v3 sounds good. You can choose a variety of OS’s or even applications that are preloaded (like Wordpress or w/e) 
+
+For now we’re going to just launch a plain old web server with ubuntu. Click create. Woo. Alright so they are provisioning your server - your server is virtualized ontop of another server which is pretty interesting - it’s assigned an ip address. Explain what an IP address is. Now you should get a root password in your inbox - it might take a minute or two.
+
+
+Now you can do this process on any host. There are other ones - like EC2 from Amazon, Linode, Rackspace etc. They’ll provision a server and send you an ip address and root password or something similar.
+
+So you just got an email - great so we’re going to login the same way you login into your instructional machines - ssh. Secure Shell. If you use a mac: Open Terminal and type in ssh root@theIPadress. If you’re using Windows - open Putty and SSH in. 
+
+You can change your password with the `passwd` command. Now normally it’s not good practice to login as root - you’d create your own user and what not - but for now let’s ignore that.
+
+So now you have your server, but if you type in your IP address in your browser you don’t get anything. Why? It’s because there’s nothing installed. Let’s install a web server. A web server is something that presents your web page to users and handles communicating with the visitor. Every website is powered by some kind of web server. One popular web browser is apache. 
+
+
+We’re going install it - but first we’ll install updates that need to be installed. Run these commands. type Y if it asks you to confirm.
+`
+sudo apt-get update
+sudo apt-get install apache2 unzip git-core
+
+
+`
+Go to that IP Address: Paste it into your web browser. You should see “IT WORKS” 
+
+
+Awesome. Let’s change what it says now. Let’s navigate to the web directory: cd /var/www
+Type in `ls` and you’ll see that there is a index.html file. Use nano or vim to edit the file. nano index.html and change the text 
+Control-X and type yes to save. 
+
+
+Now reload the page. 
+
+Neat!  Let’s do something a bit more interesting: 
+
+
+rm index.html and see what happens. Refresh the page. It turns into a directory listing. 
+
+
+now let’s make it more pretty. make sure you are in /var/www and do
+
+
+wget -qO- -O tmp.zip http://html5up.net/telephasic/download && unzip tmp.zip && rm tmp.zip
+
+
+Now refresh and see what you get. A nice pretty website! Nice. Click around for a while. Everything works. 
+
+It’s important that your page is fast so let’s do a speed test at http://tools.pingdom.com/fpt/
+I got 1.89 Seconds. 
+
+
+Now what happens when there’s an error (like visiting a page that doesn’t exist?): Lets see.
+
+
+Let’s go into the apache configuration to see what we can do. (Explain sites-enabled what not)
+
+
+cd /etc/apache2/sites-enabled/
+nano 000-default
+
+
+under <directory /var/www> 
+type in: ErrorDocument 404 /index.html
+
+
+then do: 
+sudo service apache2 restart
+
+
+Now you should see your error page just be the index. (explain configuration etc)
+We can now edit the website to do whatever. Now how do you deploy onto the server (you can use scp/putty or a variety of things (or just edit on the server)
+
+Now let’s install PHP. 
+sudo apt-get install php5 libapache2-mod-php5 php5-mcrypt
+
+
+Optional: (Add index.php to be a valid index) 
+sudo nano /etc/apache2/mods-enabled/dir.conf
+
+
+<IfModule mod_dir.c>
+         DirectoryIndex index.php index.html index.cgi index.pl index.php index.xhtml index.htm
+
+</IfModule>
+
+
+Now you can have PHP and use it. I can give a demo if anyone is interested. 
+
+
+Now let’s rip Apache out - it’s pretty slow and Nginx (pronounced engine-x is the new thing): 
+
+sudo apt-get install nginx
+sudo apt-get install php5-fpm
+
+Let’s stop Apache. We can see what’s running by executing top. 
+sudo service apache2 stop && sudo service nginx start
+
+
+Refresh your browser.  Your website is gone - Welcome to Nginx. 
+
+
+Let’s check out the nginx config file to see how we can get it back.
+
+
+sudo nano /etc/nginx/sites-available/default
+
+
+
+Now if you had an actual site you’d change it into server_name yoursite.com www.yoursite.com
+but for now lets go to the root. Anytime  you make changes to the web server config you need to restart the server. you can do that by doing sudo service nginx restart
+
+cd /usr/share/nginx/www
+
+
+You see an index.html. Well now we can delete the index.html and redownload our website. 
+rm index.html
+wget -qO- -O tmp.zip http://html5up.net/telephasic/download && unzip tmp.zip && rm tmp.zip
+
+
+Now it’s being served by nginx. Let’s check open chrome developer tools (inspect element & refresh then go to network) 
+
+
+Repeat the speed test: http://tools.pingdom.com/fpt/
+I got 900ms (which is twice as fast!) http://tools.pingdom.com/fpt/#!/bdlbzj/http://107.170.251.64/
+
+
+Now let’s talk about DNS. How do you actually get your site to show up. Do a quick demo and use dig. Now let’s talk about AWS. Launch an instance or rather 10. Spot Requests. Cloudfront/S3. Free plan. Elastic Beanstalk + New Relic. Talk about load balancing and elastic-ness.
+
+
+We have time left over - now what do you want to do?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+If you actually want use Nginx: Here’s a more comprehensive guide: https://www.digitalocean.com/community/articles/how-to-migrate-from-an-apache-web-server-to-nginx-on-an-ubuntu-vps
+
+
+
+
+Here’s instructions on how to login (from DigitalOcean) 
+Step Seven—Log In To Your Droplet
+
+
+The process is slightly different for Mac and Windows Computers:
+How to Log In With a Mac
+
+
+1. To log in on a Mac computer, open the terminal program (in the utilities folder) and type in the following command, logging in with the ip address from the welcome email: ssh root@your_ip_address
+2. 3. Type "yes" when the prompt asks if you want to connect to the host. When prompted, type in the root password that was emailed to you and press enter. Although the password is entered when you type, it does not show up on the screen for security reasons.
+
+
+You will then be connected to your DigitalOcean Droplet
+How to Log In With Windows
+
+
+To log into your droplet on windows, you will need to have PuTTY, an SSH client, installed on your computer. 
+
+
+1. You can download the program here. Choose the windows installer.
+2. Once PuTTY is downloaded and installed, starting the program will take you to the configuration screen.
+3. 4. Fill in the “Host Name (or IP address)” field with the Droplet IP address from the welcome email, make sure the port number is 22, and the connection type is SSH.
+5. 6. Additionally, click on the sidebar entry, SSH, and select “2 only” as the preferred SSH protocol version.
+7. 8. Once everything is configured, you can name and save these preferences for the future by clicking on Session in the side bar and typing a title into the Saved Sessions field. Then click save.
+9. 10. Double click on the session name to connect, and accept the subsequent pop up that asks if you want to connect to the host. After PuTTY starts up, type in the root password that was emailed to you.
