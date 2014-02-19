@@ -90,7 +90,10 @@ Now it should look like this.
                 ErrorDocument 404 /index.html
 ```
 
-Then: ```sudo service apache2 restart```
+Then: 
+```
+sudo service apache2 restart
+```
 
 
 Now go to page that doesn't exist in your browser- so instead of index.html try /nope.html
@@ -121,6 +124,7 @@ sudo nano /etc/nginx/sites-available/default
 ```
 cd /usr/share/nginx/www
 ```
+
 Refresh your browser
 
 ```
@@ -157,9 +161,3 @@ wget -qO- -O tmp.zip http://html5up.net/telephasic/download && unzip tmp.zip && 
 
 #### Sources:
 1. [Digital Ocean's Community Articles](https://www.digitalocean.com/community/)
-
-
-
-
-
-
