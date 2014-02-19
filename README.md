@@ -161,9 +161,3 @@ wget -qO- -O tmp.zip http://html5up.net/telephasic/download && unzip tmp.zip && 
 
 #### Sources:
 1. [Digital Ocean's Community Articles](https://www.digitalocean.com/community/)
-
-
-
-
-
-
